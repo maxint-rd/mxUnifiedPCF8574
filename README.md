@@ -5,8 +5,20 @@ This library (Arduino IDE version 1.6 and higher) is a child library of the mxUn
 API to drive PCF8574 I2C I/O expanders via the dedicated I2C SDA/SCL or (on ESP826) using selected pins. 
 
 By using this library, setting a pin of the shift-register is as easy as calling Arduino's digitalWrite().
-The library implements shiftOut() to allow device specific drivers using the expanded pins of the I/O expander
-to be used as easy as those on the MCU.
+The library implements shiftOut() to allow device specific drivers using the expanded pins of the I/O expander to be used as easy as those on the MCU.
+
+# Troubleshooting tips
+- Install both this library as the required parent library (download from https://github.com/maxint-rd/mxUnifiedIO)
+- Use a I2C scanner sketch to see if the PCF8574 I2C LCD driver is properly connected and responding (see link below).
+- Check if all data-pins between MCU, interface modules and devices are properly connected, according the pins as defined in your sketch.
+- Use a multimeter to check pin voltages. Note: most PCF8574 modules are both 3.3V and 5V complient. However, some modules may need specific voltages. You may want to use a level-shifter to convert voltages.
+
+# For reference
+- Arduino I2C scanner sketches:
+    * https://playground.arduino.cc/Main/I2cScanner
+- Rob Tillaarts PCF8574 library:
+    * https://github.com/RobTillaart/Arduino/tree/master/libraries/PCF8574
+    * https://playground.arduino.cc/Main/PCF8574Class
 
 # Features & limitations
 - The current version of this library supports ESP8266 and Atmel ATmega328 and ATmega168 MCUs. Other Atmel processors may work as well, but they've not been tested yet. For some MCUs the library will require modification. Please let me know if you've successfully used this library with other MCUs.
