@@ -67,7 +67,7 @@ Pin Description
     * https://playground.arduino.cc/Main/PCF8574Class
 
 # Features & limitations
-- The current version of this library supports ESP8266 and Atmel ATmega328 MCUs. Testing with an 3v3 168 Pro Mini running at 8MHz wasn't succesful, whereas the 328 3v3 8MHz version worked just fine. Other Atmel processors may work too, but they've not been tested yet. For some MCUs the library will require modification. Please let me know if you've successfully used this library with other MCUs.
+- The current version of this library supports ESP8266 and Atmel ATmega328 and ATmega168 (tested Pro Mini's running at 8MHz/3v3). Other Atmel processors may work too, but they've not been tested yet. For some MCUs the library will require modification. Please let me know if you've successfully used this library with other MCUs.
 - In the current version of this library only OUTPUT mode is supported. digitalWrite() and shiftOut() are used to set the output pins. digitalRead() can be used to query the status of an output pin. The PCF8574 has limited input posibilities which may be supported by future versions of this library.
 - Using digitalWrite() to change one expanded pin requires sending a whole byte to the I/O expander using the serial I2C protocol. Therefor the maximum speed that can be achieved is much lower than using direct MCU pins.
 - Best speeds can be obtained by by using a fast MCU. The ESP8266 has a higher clock-speed than an ATmega328.
