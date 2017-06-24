@@ -7,6 +7,52 @@ API to drive PCF8574 I2C I/O expanders via the dedicated I2C SDA/SCL or (on ESP8
 By using this library, setting a pin of the shift-register is as easy as calling Arduino's digitalWrite().
 The library implements shiftOut() to allow device specific drivers using the expanded pins of the I/O expander to be used as easy as those on the MCU.
 
+# Connections and Pinout
+- The mxUnifiedPCF8574 constructor only requires the I2C address when using hardware SPI.
+- On the Arduino Uno, Nano and Pro Mini, the hardware I2C pins are SDA=A4 and SCL=A5.
+- On the ESP8266 the default pins for I2C are GPIO4 and GPIO5.
+- On ESP8266 you can also use alternative I2C pins.
+- The ESP-01 has only 4 pins available. If you dont use serial you can use 1 (TX) and 3 (RX) for I2C.
+```C++
+mxUnifiedPCF8574 unio = mxUnifiedPCF8574(0x27);     // use the PCF874 I2C output expander on address 0x27
+//mxUnifiedPCF8574 unio = mxUnifiedPCF8574(0x27, 2, 0);     // on ESP8266 you can also use alternative I2C pins. Here SDA=2 and SCL=0
+```
+
+Please note that the pins on the PCF8574 are intended to be used for data. They cannot deliver much current. When connecting LEDs to the pins, they may not light up very brightly.
+
+The LCD backpack module has for that specific reason a transistor to drive the LCD backlight LEDs. See the pinout of the module below
+
+```
+PCF8574 I2C LCD driver backpack module pinout
+
+     +---------------------+
+-SCL-+   ::: +---+         |
+-SCA-+   +-+ |PCF| ''': LED+-
+-VCC-+   |*| |   |  ..- jmp+-
+-GND-+   +-+ +---+         |
+     +---------------------+
+        1234567890123456
+        ||||||||||||||||
+
+Pin Description
+ 1  GND
+ 2  VCC
+ 3  Contrast (adjustable VCC->Pot->Pin3)
+ 4  P0
+ 5  P1
+ 6  P2
+ 7  not connected
+ 8  not connected
+ 9  not connected
+10  not connected
+11  P4
+12  P5
+13  P6
+14  P7
+15  VCC (for LED)
+16  P3 (connected via LED jumper to J3Y (=S8050) transistor, sink)
+```
+
 # Troubleshooting tips
 - Install both this library as the required parent library (download from https://github.com/maxint-rd/mxUnifiedIO)
 - Use a I2C scanner sketch to see if the PCF8574 I2C LCD driver is properly connected and responding (see link below).
@@ -21,7 +67,7 @@ The library implements shiftOut() to allow device specific drivers using the exp
     * https://playground.arduino.cc/Main/PCF8574Class
 
 # Features & limitations
-- The current version of this library supports ESP8266 and Atmel ATmega328 and ATmega168 MCUs. Other Atmel processors may work as well, but they've not been tested yet. For some MCUs the library will require modification. Please let me know if you've successfully used this library with other MCUs.
+- The current version of this library supports ESP8266 and Atmel ATmega328 MCUs. Testing with an 3v3 168 Pro Mini running at 8MHz wasn't succesful, whereas the 328 3v3 8MHz version worked just fine. Other Atmel processors may work too, but they've not been tested yet. For some MCUs the library will require modification. Please let me know if you've successfully used this library with other MCUs.
 - In the current version of this library only OUTPUT mode is supported. digitalWrite() and shiftOut() are used to set the output pins. digitalRead() can be used to query the status of an output pin. The PCF8574 has limited input posibilities which may be supported by future versions of this library.
 - Using digitalWrite() to change one expanded pin requires sending a whole byte to the I/O expander using the serial I2C protocol. Therefor the maximum speed that can be achieved is much lower than using direct MCU pins.
 - Best speeds can be obtained by by using a fast MCU. The ESP8266 has a higher clock-speed than an ATmega328.
