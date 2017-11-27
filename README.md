@@ -1,26 +1,28 @@
-# mxUnifiedPCF8574
-mxUnifiedIO child library for Arduino. Use device specific drivers with PCF8574 I2C I/O expanders using a unified API.
+# mxUnifiedPCF8574 / mxUnifiedPCF8575
+mxUnifiedIO child library for Arduino. Use device specific drivers with PCF8574/PCF8575 I2C I/O expanders using a unified API.
 
 This library (Arduino IDE version 1.6 and higher) is a child library of the mxUnifiedIO library. It provides a unified
-API to drive PCF8574 I2C I/O expanders via the dedicated I2C SDA/SCL or (on ESP826) using selected pins. 
+API to drive PCF8574, PCF8574A and PCF8575 I2C I/O expanders via the dedicated I2C SDA/SCL or (on ESP826) using selected pins. 
 
 By using this library, setting a pin of the shift-register is as easy as calling Arduino's digitalWrite().
 The library implements shiftOut() to allow device specific drivers using the expanded pins of the I/O expander to be used as easy as those on the MCU.
 
 # Connections and Pinout
-- The mxUnifiedPCF8574 constructor only requires the I2C address when using hardware SPI.
+- This library supports both the 8-bit PCF8574/PCF8574A and the 16-bit PCF8575 I2C I/O expanders
+- The mxUnifiedPCF8574 and mxUnifiedPCF8575 constructors only require the I2C address when using hardware SPI.
 - On the Arduino Uno, Nano and Pro Mini, the hardware I2C pins are SDA=A4 and SCL=A5.
 - On the ESP8266 the default pins for I2C are GPIO4 and GPIO5.
 - On ESP8266 you can also use alternative I2C pins.
 - The ESP-01 has only 4 pins available. If you dont use serial you can use 1 (TX) and 3 (RX) for I2C.
 ```C++
-mxUnifiedPCF8574 unio = mxUnifiedPCF8574(0x27);     // use the PCF874 I2C output expander on address 0x27
+mxUnifiedPCF8574 unio = mxUnifiedPCF8574(0x27);     // use the PCF874 I2C 8-bit output expander on address 0x27
 //mxUnifiedPCF8574 unio = mxUnifiedPCF8574(0x27, 2, 0);     // on ESP8266 you can also use alternative I2C pins. Here SDA=2 and SCL=0
+//mxUnifiedPCF8575 unio = mxUnifiedPCF8575(0x20);     // use the PCF875 I2C 16-bit output expander on address 0x20
 ```
 
-Please note that the pins on the PCF8574 are intended to be used for data. They cannot deliver much current. When connecting LEDs to the pins, they may not light up very brightly.
+Please note that the pins on the PCF8574 and PCF8575 are intended to be used for data. They cannot deliver much current. When connecting LEDs to the pins, they may not light up very brightly.
 
-The LCD backpack module has for that specific reason a transistor to drive the LCD backlight LEDs. See the pinout of the module below
+The LCD backpack module features a PCF8574 chip. To drive the  LCD backlight LEDs with sufficient current, it uses a transistor. See the pinout of the module below:
 
 ```
 PCF8574 I2C LCD driver backpack module pinout
@@ -55,9 +57,9 @@ Pin Description
 
 # Troubleshooting tips
 - Install both this library as the required parent library (download from https://github.com/maxint-rd/mxUnifiedIO)
-- Use a I2C scanner sketch to see if the PCF8574 I2C LCD driver is properly connected and responding (see link below).
+- Use an I2C scanner sketch to see if the I2C device is properly connected and responding (see link below).
 - Check if all data-pins between MCU, interface modules and devices are properly connected, according the pins as defined in your sketch.
-- Use a multimeter to check pin voltages. Note: most PCF8574 modules are both 3.3V and 5V complient. However, some modules may need specific voltages. You may want to use a level-shifter to convert voltages.
+- Use a multimeter to check pin voltages. Note: most PCF8574/PCF8575 modules are both 3.3V and 5V complient. However, some modules may need specific voltages. You may want to use a level-shifter to convert voltages.
 
 # For reference
 - Arduino I2C scanner sketches:
@@ -68,10 +70,11 @@ Pin Description
 
 # Features & limitations
 - The current version of this library supports ESP8266 and Atmel ATmega328 and ATmega168 (tested Pro Mini's running at 8MHz/3v3). Other Atmel processors may work too, but they've not been tested yet. For some MCUs the library will require modification. Please let me know if you've successfully used this library with other MCUs.
-- In the current version of this library only OUTPUT mode is supported. digitalWrite() and shiftOut() are used to set the output pins. digitalRead() can be used to query the status of an output pin. The PCF8574 has limited input posibilities which may be supported by future versions of this library.
-- Using digitalWrite() to change one expanded pin requires sending a whole byte to the I/O expander using the serial I2C protocol. Therefor the maximum speed that can be achieved is much lower than using direct MCU pins.
+- In the current version of this library only OUTPUT mode is supported. digitalWrite() and shiftOut() are used to set the output pins. digitalRead() can be used to query the status of an output pin. The PCF8574 and PCF8575 have (limited) input posibilities which may be supported by future versions of this library.
+- Using shiftOut() requires startTransaction() and endTransaction().
+- Using digitalWrite() to change one expanded pin requires sending multiple bits to the I/O expander using the serial I2C protocol (both addressing information plus the data byte - even two bytes when using the PCF8575). Therefor the maximum speed that can be achieved is much lower than using direct MCU pins.
 - Best speeds can be obtained by by using a fast MCU. The ESP8266 has a higher clock-speed than an ATmega328.
-- shiftOUt() can be used as software SPI on expanded pins, where you can choose which pin to use for MOSI and SCK. Please note that shifting one byte out requires 16 changes of the clock pin, so this is much slower than using direct MCU pins. However, the Nokia LCD examples shows that the results can still be quite usable. See https://github.com/maxint-rd/mxUnifiedPCD8544_Nokia_5110_LCD for more info and the specific examples.
+- shiftOUt() can be used as software SPI on expanded pins, where you can choose which pin to use for MOSI and SCK. Please note that shifting one byte out requires 16 changes of the clock pin (even four bytes when using the PCF8575), so this is much slower than using direct MCU pins. However, the Nokia LCD examples show that the results can still be quite usable. See https://github.com/maxint-rd/mxUnifiedPCD8544_Nokia_5110_LCD for more info and the specific examples.
 
 # Disclaimer
 - All code on this GitHub account, including this library is provided to you on an as-is basis without guarantees and with all liability dismissed. It may be used at your own risk. Unfortunately I have no means to provide support.
