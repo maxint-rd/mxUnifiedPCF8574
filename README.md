@@ -1,14 +1,13 @@
 # mxUnifiedPCF8574 / mxUnifiedPCF8575
 mxUnifiedIO child library for Arduino. Use device specific drivers with PCF8574/PCF8575 I2C I/O expanders using a unified API.
 
-This library (Arduino IDE version 1.6 and higher) is a child library of the mxUnifiedIO library. It provides a unified
-API to drive PCF8574, PCF8574A and PCF8575 I2C I/O expanders via the dedicated I2C SDA/SCL or (on ESP826) using selected pins. 
+This library (Arduino IDE version 1.6 and higher) is a child library of the [mxUnifiedIO](https://github.com/maxint-rd/mxUnifiedIO) library. It provides a unified API to drive PCF8574, PCF8574A and PCF8575 I2C I/O expanders via the dedicated I2C SDA/SCL or (on ESP826) using selected pins. 
 
 By using this library, setting a pin of the shift-register is as easy as calling Arduino's digitalWrite().
 The library implements shiftOut() to allow device specific drivers using the expanded pins of the I/O expander to be used as easy as those on the MCU.
 
 # Connections and Pinout
-- This library supports both the 8-bit PCF8574/PCF8574A and the 16-bit PCF8575 I2C I/O expanders
+- This library supports both the 8-bit PCF8574/PCF8574A and the 16-bit PCF8575 I2C I/O expanders. See [documentation](./documentation) for manufacturer datasheets. See below for pinout of LCD backpack module featuring the PCF8574.
 - The mxUnifiedPCF8574 and mxUnifiedPCF8575 constructors only require the I2C address when using hardware SPI.
 - On the Arduino Uno, Nano and Pro Mini, the hardware I2C pins are SDA=A4 and SCL=A5.
 - On the ESP8266 the default pins for I2C are GPIO4 and GPIO5.
