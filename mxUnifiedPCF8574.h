@@ -21,6 +21,10 @@ class mxUnifiedPCF8574 : public mxUnifiedIO
  	mxUnifiedPCF8574(uint8_t uI2C_address); // Constructor
 #endif
 
+#if(_MXUNIFIEDIO_DEBUG)
+	void printDebug();
+#endif
+
   // These are be overridden by this subclass to provide device-specific
   // optimized code.  Otherwise 'generic' versions are used.
 #if defined(ESP8266)
@@ -41,6 +45,25 @@ class mxUnifiedPCF8574 : public mxUnifiedIO
 	uint32_t _i2c_speed;
  	uint8_t _i2c_sda;
  	uint8_t _i2c_scl;
+};
+
+
+class mxUnifiedPCF8575 : public mxUnifiedPCF8574
+{
+ public:
+#if defined(ESP8266)
+  mxUnifiedPCF8575(uint8_t uI2C_address, uint8_t nPinSDA = SDA, uint8_t nPinSCL = SCL) : mxUnifiedPCF8574(uI2C_address, nPinSDA, nPinSCL)
+#else
+ 	mxUnifiedPCF8575(uint8_t uI2C_address) : mxUnifiedPCF8574(uI2C_address)
+#endif
+	{ // Constructor
+		_nConstr++;		// Constructor counter only for debug purposes
+		_nNumPins=16;
+	};
+	
+// 	void digitalWrite(uint8_t nPin, uint8_t nVal);
+  void send16Bits(bool fClosedTransmission=true);
+  void sendBits(void);
 };
 
 #endif // _MXUNIFIEDPCF8574_H

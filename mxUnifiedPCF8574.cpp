@@ -37,6 +37,14 @@ mxUnifiedPCF8574::mxUnifiedPCF8574(uint8_t uI2C_address)
 #endif
 }
 
+#if(_MXUNIFIEDIO_DEBUG)
+void mxUnifiedPCF8574::printDebug()
+{
+	Serial.print(F("Debug: "));
+	Serial.println(_nConstr);
+}
+#endif
+
 void mxUnifiedPCF8574::begin(uint32_t i2c_speed)		// default ESP8266: uint32_t i2c_speed=1000000L, others: uint32_t i2c_speed=400000L
 {	// there is an alternative begin() for ESP using higher default I2C speed
 	_i2c_error = 0;
@@ -93,13 +101,22 @@ void mxUnifiedPCF8574::shiftOut(uint8_t nDataPin, uint8_t nClockPin, uint8_t bit
   	setBit(nClockPin, LOW);
   	setBit(nDataPin, (nValue & bit));
     aI2C_bytestream[uCnt++]=_dataOut;
+    if(_nNumPins==16) aI2C_bytestream[uCnt++]=_dataOut>>8;
+
     //Wire.write(_i2c_dataOut);
   	setBit(nClockPin, HIGH);
     aI2C_bytestream[uCnt++]=_dataOut;
+    if(_nNumPins==16) aI2C_bytestream[uCnt++]=_dataOut>>8;
     //Wire.write(_i2c_dataOut);
+
+    if(uCnt==16)
+    {
+		  Wire.write(aI2C_bytestream, sizeof(aI2C_bytestream));		// writing the bytes of all 16 bits in one go (still takes 302-480ms)
+		  uCnt=0;
+		}
   }
 //	Serial.print(F("W"));
-  Wire.write(aI2C_bytestream, sizeof(aI2C_bytestream));		// writing the bytes of all 16 bits in one go (still takes 302-480ms)
+//  Wire.write(aI2C_bytestream, sizeof(aI2C_bytestream));		// writing the bytes of all 16 bits in one go (still takes 302-480ms)
 //	Serial.print(F("e"));
 }
 
@@ -127,9 +144,55 @@ void mxUnifiedPCF8574::digitalWrite(uint8_t nPin, uint8_t nVal)
   Serial.println(F(")"));
 #endif
 
-	if (nPin > 7) return;
+	if (nPin >= _nNumPins) return;
 	setBit(nPin, nVal);
 //	::digitalWrite(_aPins[nPin], nVal);		// call the regular digitalWrite using the global scope resolution operator
-	send8Bits();
+	sendBits();
 }	
 
+// ------------------------
+// The PCF8575 is almost identical, but has 16 bit I/O
+// instead of one byte, two bytes should be written
+
+void mxUnifiedPCF8575::send16Bits(bool fClosedTransmission)		// default: fClosedTransmission=true
+{    // Overwrite in subclasses if desired!
+	if(fClosedTransmission)
+		startTransmission();
+  Wire.write(_dataOut);
+  Wire.write(_dataOut>>8);
+	if(fClosedTransmission)
+	  endTransmission();		// this call will do the actual sending of the bits
+}
+
+void mxUnifiedPCF8575::sendBits()
+{
+	send16Bits();
+}
+
+/*
+void mxUnifiedPCF8575::digitalWrite(uint8_t nPin, uint8_t nVal)
+{ // Overwrite in subclasses if desired!
+#if(_MXUNIFIEDIO_DEBUG)
+  Serial.print(F("mxUnifiedPCF8574::digitalWrite("));
+  Serial.print(nPin);
+  Serial.print(F(","));
+  Serial.print(nVal);
+  Serial.println(F(")"));
+#endif
+
+	if (nPin > 15) return;
+	setBit(nPin, nVal);
+//	::digitalWrite(_aPins[nPin], nVal);		// call the regular digitalWrite using the global scope resolution operator
+	send16Bits();
+}
+*/
+
+/*
+#ifdef ESP8266
+mxUnifiedPCF8575::mxUnifiedPCF8575(uint8_t uI2C_address, uint8_t nPinSDA, uint8_t nPinSCL)		// defaults:  uint8_t nPinSDA = SDA, uint8_t nPinSCL = SCL);
+#else
+mxUnifiedPCF8575::mxUnifiedPCF8575(uint8_t uI2C_address)
+#endif
+{
+}
+*/
