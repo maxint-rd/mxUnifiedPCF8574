@@ -82,6 +82,21 @@ void mxUnifiedPCF8574::sendBits()
 	send8Bits();
 }
 
+uint8_t mxUnifiedPCF8574::receive8Bits()
+{
+  byte _data;
+	uint8_t nBytes=Wire.requestFrom(_i2c_address, (size_t)1);			// adress, request size
+  if(Wire.available()) {
+    _data = Wire.read();
+  }
+  return _data;
+}
+
+void mxUnifiedPCF8574::receiveBits()
+{
+	_dataIn=receive8Bits();
+}
+
 void mxUnifiedPCF8574::shiftOut(uint8_t nDataPin, uint8_t nClockPin, uint8_t bitOrder, uint8_t nValue)
 {	// shiftOut the bits of one byto to the stated exended data and clock pins
 	// TODO: bitOrder can be MSBFIRST or LSBFIRST, not implemented yet!
@@ -146,10 +161,39 @@ void mxUnifiedPCF8574::digitalWrite(uint8_t nPin, uint8_t nVal)
 
 	if (nPin >= _nNumPins) return;
 	setBit(nPin, nVal);
-//	::digitalWrite(_aPins[nPin], nVal);		// call the regular digitalWrite using the global scope resolution operator
 	sendBits();
-}	
+}
 
+void mxUnifiedPCF8574::pinMode(uint8_t nPin, uint8_t nMode)
+{	// Specify the pins set to input so when reading they can be set HIGH to read their status
+
+	// set pin modes one bit per pin: 0=output, 1=input
+	if(nMode==INPUT) _pinModes |= ((uint16_t)1 << nPin);			// cast is needed to avoid shifting to negative 16bit values. TODO: no support for nMode==INPUT_HIGH in ESP?
+	else _pinModes &= ~((uint16_t)1 << nPin);
+
+	return;
+}
+
+int mxUnifiedPCF8574::digitalRead(uint8_t nPin)
+{	// When reading pins on a PCF chip, they need to be set high first
+	// We only set pins HIGH that are set to pinMode INPUT, the other pins should remain what they are.
+	if (nPin >= _nNumPins) return(LOW);
+
+	// set input pin HIGH (only for pins in pinmode INPUT or INPUT_HIGH if not HIGH yet)
+	if(_pinModes & bit(nPin) && !(_dataOut & bit(nPin)))
+			digitalWrite(nPin, HIGH);
+	
+	// read the input values
+	receiveBits();		// receive current state into _dataIn
+	
+	// return the value of the specified bit
+	return((_dataIn & (uint16_t)1<<nPin)?HIGH:LOW);
+}
+
+
+
+// -------------------- PCF8575 -----------------------------
+//
 // ------------------------
 // The PCF8575 is almost identical, but has 16 bit I/O
 // instead of one byte, two bytes should be written
@@ -169,30 +213,21 @@ void mxUnifiedPCF8575::sendBits()
 	send16Bits();
 }
 
-/*
-void mxUnifiedPCF8575::digitalWrite(uint8_t nPin, uint8_t nVal)
-{ // Overwrite in subclasses if desired!
-#if(_MXUNIFIEDIO_DEBUG)
-  Serial.print(F("mxUnifiedPCF8574::digitalWrite("));
-  Serial.print(nPin);
-  Serial.print(F(","));
-  Serial.print(nVal);
-  Serial.println(F(")"));
-#endif
-
-	if (nPin > 15) return;
-	setBit(nPin, nVal);
-//	::digitalWrite(_aPins[nPin], nVal);		// call the regular digitalWrite using the global scope resolution operator
-	send16Bits();
-}
-*/
-
-/*
-#ifdef ESP8266
-mxUnifiedPCF8575::mxUnifiedPCF8575(uint8_t uI2C_address, uint8_t nPinSDA, uint8_t nPinSCL)		// defaults:  uint8_t nPinSDA = SDA, uint8_t nPinSCL = SCL);
-#else
-mxUnifiedPCF8575::mxUnifiedPCF8575(uint8_t uI2C_address)
-#endif
+uint16_t mxUnifiedPCF8575::receive16Bits()
 {
+  byte data1;
+  byte data2;
+	uint8_t nBytes=Wire.requestFrom(_i2c_address, (size_t)2);			// adress, request size
+  if(Wire.available()) {
+    data1 = Wire.read();
+  }
+  if(Wire.available()) {
+    data2 = Wire.read();
+  }
+  return((data1<<8) | data2);
 }
-*/
+
+void mxUnifiedPCF8575::receiveBits()
+{
+	_dataIn=receive16Bits();
+}

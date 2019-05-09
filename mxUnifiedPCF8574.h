@@ -40,8 +40,18 @@ class mxUnifiedPCF8574 : public mxUnifiedIO
   
  	void digitalWrite(uint8_t nPin, uint8_t nVal);
 
+ 	void pinMode(uint8_t nPin, uint8_t nMode);
+ 	int digitalRead(uint8_t nPin);
+
+ protected:
+ 	uint8_t _i2c_address;
+	uint8_t receive8Bits();
+	void receiveBits();
+	uint16_t _pinModes;			// store setup of pinmode one bit per pin 0=output, 1=input (being lazy use a 16 bit variable also used for PCF8575)
+	uint16_t _dataIn;				// to store received data (TODO: storing is not really needed, can be optimized...)
+
  private:
- 	uint8_t _i2c_address, _i2c_error;
+ 	uint8_t _i2c_error;
 	uint32_t _i2c_speed;
  	uint8_t _i2c_sda;
  	uint8_t _i2c_scl;
@@ -61,9 +71,12 @@ class mxUnifiedPCF8575 : public mxUnifiedPCF8574
 		_nNumPins=16;
 	};
 	
-// 	void digitalWrite(uint8_t nPin, uint8_t nVal);
   void send16Bits(bool fClosedTransmission=true);
   void sendBits(void);
+
+ protected:
+	uint16_t receive16Bits();
+	void receiveBits();
 };
 
 #endif // _MXUNIFIEDPCF8574_H
