@@ -69,10 +69,11 @@ Pin Description
 
 # Features & limitations
 - The current version of this library supports ESP8266 and Atmel ATmega328 and ATmega168 (tested Pro Mini's running at 8MHz/3v3). Other Atmel processors may work too, but they've not been tested yet. For some MCUs the library will require modification. Please let me know if you've successfully used this library with other MCUs.
-- The PCF8574 and PCF8575 have (limited) input posibilities which are supported by this library. The library provides no specific support for the interrupt pin INT of the PCF8574/8575 chip.
-- Using pinMode(pin, OUTPUT) a pin can be set to input mode. digitalWrite() and shiftOut() are used to set the output pins.
+- The PCF8574 and PCF8575 have certain input posibilities which are supported by this library. The library provides no specific support for the interrupt pin INT of the PCF8574/8575 chip.
+- Using pinMode(pin, OUTPUT) a pin can be set to output mode. digitalWrite() and shiftOut() are used to set the output pins.
 - Using pinMode(pin, INPUT) a pin can be set to input mode. digitalRead() can be used to query the current status of an input pin.
-- Using digitalRead() on an input pin will set the pin HIGH prior to reading the current state. When digitalRead() is used for an output pin it returns the last state that was set.
+- Using digitalRead() on an input pin will briefly set the pin HIGH prior to reading the current state. When digitalRead() is used for an output pin it returns the last state that was set.
+- Input pins support dual mode. In dual mode the pin can be used as both input and output pin, eg. for a toggle led with a button. Such toggle led should be connected between VCC and pin, whereas the button is connected between GND and pin. digitalWrite() can be used to set the pin LOW and it is only briefly set high when reading the input state.
 - Using shiftOut() requires startTransaction() and endTransaction().
 - Using digitalWrite() to change one expanded pin requires sending multiple bits to the I/O expander using the serial I2C protocol (both addressing information plus the data byte - even two bytes when using the PCF8575). Therefor the maximum speed that can be achieved is much lower than using direct MCU pins.
 - Best speeds can be obtained by by using a fast MCU. The ESP8266 has a higher clock-speed than an ATmega328.
