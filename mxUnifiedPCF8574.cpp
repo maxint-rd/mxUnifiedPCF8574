@@ -178,15 +178,28 @@ int mxUnifiedPCF8574::digitalRead(uint8_t nPin)
 {	// When reading pins on a PCF chip, they need to be set high first
 	// We only set pins HIGH that are set to pinMode INPUT, the other pins should remain what they are.
 	if (nPin >= _nNumPins) return(LOW);
+	bool fPin=getBit(nPin);
 
-	// set input pin HIGH (only for pins in pinmode INPUT or INPUT_HIGH if not HIGH yet)
-	if(_pinModes & bit(nPin) && !(_dataOut & bit(nPin)))
-			digitalWrite(nPin, HIGH);
-	
-	// read the input values
+	// Only query data of pins set to input mode
+	// For output pins directly return the last value set
+	if(!(_pinModes & bit(nPin)))
+		return(fPin);
+		
+	// Set input pin HIGH to read the status (only for pins in pinmode INPUT or INPUT_HIGH if not HIGH yet)
+	// When reading the input the pin is briefly set high, but will be restored later.
+	if(!fPin)
+		digitalWrite(nPin, HIGH);
+
+	// read all the input values (sets _dataIn)
 	receiveBits();		// receive current state into _dataIn
-	
-	// return the value of the specified bit
+
+	// restore original state to allow dual use as output
+	// In dual mode one pin can be used in both input and output mode, eg. for a toggle led with a button.
+	// Such toggle led should be connected between VCC and pin, whereas the button is connected between GND and pin
+	if(!fPin)
+		digitalWrite(nPin, LOW);
+
+	// return the input value of the specified bit
 	return((_dataIn & (uint16_t)1<<nPin)?HIGH:LOW);
 }
 
