@@ -33,20 +33,21 @@ class mxUnifiedPCF8574 : public mxUnifiedIO
   void begin(uint32_t i2c_speed=400000L);
 #endif
   void send8Bits(bool fClosedTransmission=true);
-  void sendBits(void);
+  virtual void sendBits(void);
   void shiftOut(uint8_t dataPin, uint8_t clockPin, uint8_t bitOrder, uint8_t value);
   void startTransmission(void);
   void endTransmission(void);
   
- 	void digitalWrite(uint8_t nPin, uint8_t nVal);
+ 	virtual void digitalWrite(uint8_t nPin, uint8_t nVal);
 
- 	void pinMode(uint8_t nPin, uint8_t nMode);
- 	int digitalRead(uint8_t nPin);
+ 	virtual void pinMode(uint8_t nPin, uint8_t nMode);
+ 	virtual int digitalRead(uint8_t nPin);
+ 	virtual uint32_t pulseIn(uint8_t nPin, uint8_t nLevel, uint32_t nTimeOut=500000);
 
  protected:
  	uint8_t _i2c_address;
 	uint8_t receive8Bits();
-	void receiveBits();
+	virtual void receiveBits();
 	uint16_t _pinModes;			// store setup of pinmode one bit per pin 0=output, 1=input (being lazy use a 16 bit variable also used for PCF8575)
 	uint16_t _dataIn;				// to store received data (TODO: storing is not really needed, can be optimized...)
 
@@ -72,11 +73,11 @@ class mxUnifiedPCF8575 : public mxUnifiedPCF8574
 	};
 	
   void send16Bits(bool fClosedTransmission=true);
-  void sendBits(void);
+  virtual void sendBits(void);
 
  protected:
 	uint16_t receive16Bits();
-	void receiveBits();
+	virtual void receiveBits();
 };
 
 #endif // _MXUNIFIEDPCF8574_H

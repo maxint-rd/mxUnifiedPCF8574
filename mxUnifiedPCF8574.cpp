@@ -203,6 +203,20 @@ int mxUnifiedPCF8574::digitalRead(uint8_t nPin)
 	return((_dataIn & (uint16_t)1<<nPin)?HIGH:LOW);
 }
 
+uint32_t mxUnifiedPCF8574::pulseIn(uint8_t nPin, uint8_t nLevel, uint32_t nTimeOut)		//  uint32_t nTimeOut=500000
+{	// Measure duration of a pulse
+	// WARNING: for accuracy there is no yield(). Long timeouts may result in a bite from the watchdog!
+  uint32_t nTimeDone=micros()+nTimeOut;
+
+	// first wait until desired level is seen
+  while(digitalRead(nPin)!=nLevel && micros()<nTimeDone);
+  
+  // measure how long the desired level is maintained
+  uint32_t nTimeStart=micros();
+  while(digitalRead(nPin)==nLevel && micros()<nTimeDone);
+  return(micros()>nTimeDone ? 0 : micros()-nTimeStart);
+}
+
 
 
 // -------------------- PCF8575 -----------------------------
@@ -237,7 +251,7 @@ uint16_t mxUnifiedPCF8575::receive16Bits()
   if(Wire.available()) {
     data2 = Wire.read();
   }
-  return((data1<<8) | data2);
+  return((data2<<8) | data1);		// LSB first?
 }
 
 void mxUnifiedPCF8575::receiveBits()
