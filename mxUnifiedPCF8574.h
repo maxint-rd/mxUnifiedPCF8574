@@ -24,14 +24,9 @@ class mxUnifiedPCF8574 : public mxUnifiedIO
 #if(_MXUNIFIEDIO_DEBUG)
 	void printDebug();
 #endif
-
   // These are be overridden by this subclass to provide device-specific
   // optimized code.  Otherwise 'generic' versions are used.
-#if defined(ESP8266)
-  void begin(uint32_t i2c_speed=1000000L);
-#else
-  void begin(uint32_t i2c_speed=400000L);
-#endif
+  void begin(uint32_t i2c_speed=400000L);  // some MCUs allow setting higher I2C speed. Warning: high speeds may be unstable!
   void send8Bits(bool fClosedTransmission=true);
   virtual void sendBits(void);
   void shiftOut(uint8_t dataPin, uint8_t clockPin, uint8_t bitOrder, uint8_t value);

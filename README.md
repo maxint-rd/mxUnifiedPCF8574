@@ -77,7 +77,7 @@ Pin Description
 - Input pins support dual mode. In dual mode the pin can be used as both input and output pin, eg. for a toggle led with a button. Such toggle led should be connected between VCC and pin, whereas the button is connected between GND and pin. digitalWrite() can be used to set the pin LOW and it is only briefly set high when reading the input state.
 - Using shiftOut() requires startTransaction() and endTransaction().
 - Using digitalWrite() to change one expanded pin requires sending multiple bits to the I/O expander using the serial I2C protocol (both addressing information plus the data byte - even two bytes when using the PCF8575). Therefor the maximum speed that can be achieved is much lower than using direct MCU pins.
-- Best speeds can be obtained by by using a fast MCU. The ESP8266 has a higher clock-speed than an ATmega328.
+- Best speeds can be obtained by by using a fast MCU. The ESP8266 has a higher clock-speed than an ATmega328. Note however that using a higher speed may be unstable. The PCF8574 datasheet mentions 100kHz as maximum, but testing showed higher speeds are possible.
 - shiftOUt() can be used as software SPI on expanded pins, where you can choose which pin to use for MOSI and SCK. Please note that shifting one byte out requires 16 changes of the clock pin (even four bytes when using the PCF8575), so this is much slower than using direct MCU pins. However, the Nokia LCD examples show that the results can still be quite usable. See https://github.com/maxint-rd/mxUnifiedPCD8544_Nokia_5110_LCD for more info and the specific examples.
 
 # Disclaimer

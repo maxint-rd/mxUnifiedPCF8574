@@ -45,8 +45,8 @@ void mxUnifiedPCF8574::printDebug()
 }
 #endif
 
-void mxUnifiedPCF8574::begin(uint32_t i2c_speed)		// default ESP8266: uint32_t i2c_speed=1000000L, others: uint32_t i2c_speed=400000L
-{	// there is an alternative begin() for ESP using higher default I2C speed
+void mxUnifiedPCF8574::begin(uint32_t i2c_speed)		// default: uint32_t i2c_speed=400000L, some MCUs allow setting higher I2C speed
+{	
 	_i2c_error = 0;
 	_i2c_speed=i2c_speed;
 	
@@ -55,9 +55,13 @@ void mxUnifiedPCF8574::begin(uint32_t i2c_speed)		// default ESP8266: uint32_t i
 #else
 		Wire.begin();
 #endif
-		Wire.setClock(_i2c_speed);		// set clock a bit faster than the default 100 kHz
+		Wire.setClock(_i2c_speed);		// set clock a bit faster than the regular speed (default now is 400, can be set higher/lower)
+																	// Note that the PCF8574 data sheet mentions 100kHz as maximum, but test show higher speeds can be used.
 																	// 400000L (400kHz) seems fastest speed on Atmega328 8Mhz, faster (800kHz) may be possible on 16Mhz
-																	// 400000L (400kHz) seems stable speed on ESP8266@80Mzh, faster (1MHz) is possible, but perhaps less stable
+																	// 400000L (400kHz) seems stable speed on ESP8266@80Mzh, faster (1MHz) is possible when clock is 160MHz, but can be unstable.
+																	// Newer ESP8266 cores (2.7.0 and up) limit the I2C speed when running @80MHz, even when set higher.
+																	// Testing on ESP8266@160MHz showed lower actual speeds than set (100 gave 74kHz, 400 gave 327kHz, 500 gave 421 kHz and 750 gave 695Khz).
+																	// Surprisingly the PCF worked also on higher speeds, but perhaps unstable depending on connections and VCC level.
 
 #if(_MXUNIFIEDIO_DEBUG)
   Serial.print(F("mxUnifiedPCF8574::begin("));
